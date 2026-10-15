@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MonsGeek M1 V5 — что внутри</title>
+  <meta name="description" content="Учебный проект: строение клавиатуры MonsGeek M1 V5 (75%) с 3D-моделью и эффектом Exploded View.">
+
+  <!-- Шрифт Inter из Google Fonts (с кириллицей) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Пока грузится 3D, прячем плоскую картинку клавиатуры, чтобы она не мелькала.
+       Если 3D не загрузится за 10 секунд (или вообще не сможет), script.js вернёт её обратно. -->
+  <script>
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.classList.add("loading-3d");
+      setTimeout(function () { document.documentElement.classList.remove("loading-3d"); }, 10000);
+    }
+  </script>
+
+  <!-- 3D-версия: где браузеру брать библиотеку Three.js (с CDN, версия зафиксирована) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <!-- Наш скрипт: строит 3D-модель. Без него остаётся CSS-версия. -->
+  <!-- Текстуры деревянного стола (картинки, упакованные в JS) -->
+  <script src="textures.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <main>
+    <!-- =========================================================
+         ГЛАВНАЯ СЕКЦИЯ: первый экран + Exploded View + коробка.
+         Секция очень высокая (см. --section-h в style.css),
+         а внутри неё «липкая» сцена .stage, которая стоит на месте,
+         пока мы листаем. Прокрутка секции = ход анимации.
+         ========================================================= -->
+    <section class="explode" aria-label="Строение клавиатуры">
+      <div class="stage">
+
+        <!-- Первый экран: заголовок -->
+        <header class="hero-title">
+          <h1>MonsGeek M1 V5</h1>
+          <p>Что внутри 75% клавиатуры</p>
+        </header>
+
+        <!-- Подсказка для 3D-версии (видна, только когда работает 3D) -->
+        <p class="drag-hint">Потяни мышкой или пальцем, чтобы повернуть модель</p>
+
+        <!-- Настоящее фото клавиатуры (в начале и в конце анимации) -->
+        <img class="photo" src="images/keyboard.webp" width="1600" height="690"
+             alt="Клавиатура MonsGeek M1 V5 в собранном виде, вид сверху: чёрный корпус, серые кейкапы и крутилка в правом верхнем углу">
+
+        <!-- ===== Слои клавиатуры (сверху вниз) =====
+             --i — номер слоя: от него зависят высота разлёта и задержка. -->
+        <div class="layers">
+
+          <!-- 1. Кейкапы -->
+          <div class="layer" style="--i: 0">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: кейкапы">
+              <use class="d-caps" href="#k-caps"/>
+            </svg>
+            <div class="label">
+              <span class="num">01</span>
+              <h3>Кейкапы</h3>
+              <p>Колпачки клавиш — то, по чему стучат пальцы.</p>
+            </div>
+          </div>
+
+          <!-- 2. Свитчи -->
+          <div class="layer" style="--i: 1">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: свитчи">
+              <use class="d-switches" href="#k-switches"/>
+            </svg>
+            <div class="label">
+              <span class="num">02</span>
+              <h3>Свитчи</h3>
+              <p>5-pin переключатели, hot-swap: меняются без пайки.</p>
+            </div>
+          </div>
+
+          <!-- 3. Ручка-энкодер -->
+          <div class="layer" style="--i: 2">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: ручка-энкодер">
+              <!-- пунктир — контур клавиатуры, чтобы было видно, где стоит ручка -->
+              <rect class="d-ghost" x=".3" y=".3" width="16.4" height="6.65" rx=".3"/>
+              <circle class="d-knob" cx="16" cy="1" r=".42"/>
+              <circle class="d-line" cx="16" cy="1" r=".3"/>
+              <circle class="d-line" cx="16" cy="1" r=".12"/>
+            </svg>
+            <div class="label">
+              <span class="num">03</span>
+              <h3>Ручка-энкодер</h3>
+              <p>Крутилка в правом верхнем углу: громкость и другие функции.</p>
+            </div>
+          </div>
+
+          <!-- 4. Пластина из поликарбоната -->
+          <div class="layer" style="--i: 3">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: пластина из поликарбоната">
+              <rect class="d-plate" x=".3" y=".3" width="16.4" height="6.65" rx=".25" mask="url(#m-plate)"/>
+            </svg>
+            <div class="label">
+              <span class="num">04</span>
+              <h3>Пластина (PC plate)</h3>
+              <p>Поликарбонат держит свитчи и делает нажатие мягче.</p>
+            </div>
+          </div>
+
+          <!-- 5. Поролон пластины -->
+          <div class="layer" style="--i: 4">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: шумоизоляция пластины из PORON">
+              <rect class="d-foam" x=".35" y=".35" width="16.3" height="6.55" rx=".25" mask="url(#m-plate)"/>
+            </svg>
+            <div class="label">
+              <span class="num">05</span>
+              <h3>PORON plate foam</h3>
+              <p>Мягкий слой под пластиной гасит звон и лишний шум.</p>
+            </div>
+          </div>
+
+          <!-- 6. Силиконовые гаскеты -->
+          <div class="layer" style="--i: 5">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: силиконовые гаскеты по краям пластины">
+              <rect class="d-ghost" x=".3" y=".3" width="16.4" height="6.65" rx=".3"/>
+              <!-- верхний и нижний ряд гаскетов -->
+              <rect class="d-gasket" x="1.6"  y=".15" width="1.2" height=".34" rx=".17"/>
+              <rect class="d-gasket" x="5.2"  y=".15" width="1.2" height=".34" rx=".17"/>
+              <rect class="d-gasket" x="8.9"  y=".15" width="1.2" height=".34" rx=".17"/>
+              <rect class="d-gasket" x="12.6" y=".15" width="1.2" height=".34" rx=".17"/>
+              <rect class="d-gasket" x="1.6"  y="6.76" width="1.2" height=".34" rx=".17"/>
+              <rect class="d-gasket" x="5.2"  y="6.76" width="1.2" height=".34" rx=".17"/>
+              <rect class="d-gasket" x="8.9"  y="6.76" width="1.2" height=".34" rx=".17"/>
+              <rect class="d-gasket" x="12.6" y="6.76" width="1.2" height=".34" rx=".17"/>
+              <!-- боковые -->
+              <rect class="d-gasket" x=".15"  y="3.1" width=".34" height="1.1" rx=".17"/>
+              <rect class="d-gasket" x="16.51" y="3.1" width=".34" height="1.1" rx=".17"/>
+            </svg>
+            <div class="label">
+              <span class="num">06</span>
+              <h3>Силиконовые гаскеты</h3>
+              <p>Gasket mount: пластина «плавает» на мягких подушках.</p>
+            </div>
+          </div>
+
+          <!-- 7. Печатная плата -->
+          <div class="layer" style="--i: 6">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: печатная плата с гнёздами для свитчей и светодиодами">
+              <rect class="d-pcb" x=".4" y=".4" width="16.2" height="6.45" rx=".2"/>
+              <!-- декоративные дорожки -->
+              <path class="d-trace" d="M.8 6.4H6l.5-.5h4l.5.5h5.4M.8 3.1h2l.4-.4h6.2M10 1.6h2.6l.4.4h2.8M2 .8v1.2l.4.4"/>
+              <use class="d-sockets" href="#k-sockets"/>
+              <!-- светодиоды стоят снизу от центра клавиши — «южная» подсветка -->
+              <use class="d-leds" href="#k-leds"/>
+              <!-- разъём USB -->
+              <rect class="d-line" x="1.3" y=".2" width=".9" height=".35" rx=".08"/>
+            </svg>
+            <div class="label">
+              <span class="num">07</span>
+              <h3>Печатная плата (PCB)</h3>
+              <p>«Мозг» клавиатуры. Подсветка направлена на юг, к пользователю.</p>
+            </div>
+          </div>
+
+          <!-- 8. Шумоизоляция под платой -->
+          <div class="layer" style="--i: 7">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: шумоизоляционные слои под платой">
+              <rect class="d-ghost" x=".55" y=".55" width="15.9" height="6.15" rx=".2"/>
+              <rect class="d-dampen" x=".4" y=".4" width="16.2" height="6.45" rx=".2"/>
+            </svg>
+            <div class="label">
+              <span class="num">08</span>
+              <h3>Шумоизоляция под платой</h3>
+              <p>Несколько мягких слоёв убирают гулкое эхо корпуса.</p>
+            </div>
+          </div>
+
+          <!-- 9. Корпус -->
+          <div class="layer" style="--i: 8">
+            <svg class="plate" viewBox="0 0 17 7.25" role="img" aria-label="Схема: алюминиевый корпус из двух частей">
+              <rect class="d-case" x="0" y="0" width="17" height="7.25" rx=".4"/>
+              <rect class="d-line" x=".45" y=".45" width="16.1" height="6.35" rx=".2"/>
+              <circle class="d-line" cx="16" cy="1" r=".22"/>
+              <!-- защёлки по краям -->
+              <circle class="d-catch" cx="2.5" cy=".22" r=".1"/>
+              <circle class="d-catch" cx="8.5" cy=".22" r=".1"/>
+              <circle class="d-catch" cx="14.5" cy=".22" r=".1"/>
+              <circle class="d-catch" cx="2.5" cy="7.03" r=".1"/>
+              <circle class="d-catch" cx="8.5" cy="7.03" r=".1"/>
+              <circle class="d-catch" cx="14.5" cy="7.03" r=".1"/>
+            </svg>
+            <div class="label">
+              <span class="num">09</span>
+              <h3>Алюминиевый корпус</h3>
+              <p>Верх + низ на шариковых защёлках: разбирается без отвёртки.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Коробка =====
+             Три отдельные части: задняя (дно и стенки), передняя стенка и крышка.
+             Клавиатура пролезает между ними, поэтому кажется, что она внутри. -->
+        <div class="box-scene">
+          <div class="box">
+            <!-- крышка (на петле у задней стенки) -->
+            <div class="box-part box-lid">
+              <div class="lid">
+                <!-- Рисунок крышки встроен прямо сюда (копия images/box-lid.svg):
+                     так 3D-версия может взять его как текстуру -->
+                <svg class="lid-top" id="box-lid-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 566" role="img" aria-label="Крышка коробки MonsGeek: матовый чёрный картон с белым логотипом">
+                  <!-- Перерисованная крышка коробки MonsGeek (вид сверху).
+                       Матовый чёрный картон с тонкой вертикальной фактурой и белым логотипом. -->
+                  <defs>
+                    <!-- Лёгкий градиент: свет падает сверху -->
+                    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#3a3c40"/>
+                      <stop offset="0.55" stop-color="#2e3033"/>
+                      <stop offset="1" stop-color="#25272a"/>
+                    </linearGradient>
+                    <!-- Фактура гофрокартона: еле заметные вертикальные полоски -->
+                    <pattern id="ribs" width="6" height="10" patternUnits="userSpaceOnUse">
+                      <rect width="3" height="10" fill="#ffffff" opacity="0.018"/>
+                    </pattern>
+                  </defs>
+                
+                  <!-- Основа крышки -->
+                  <rect x="0" y="0" width="1000" height="566" rx="6" fill="url(#paper)"/>
+                  <rect x="0" y="0" width="1000" height="566" rx="6" fill="url(#ribs)"/>
+                  <!-- Светлый кант по краю (загиб картона) -->
+                  <rect x="3" y="3" width="994" height="560" rx="5" fill="none" stroke="#4a4d52" stroke-width="2"/>
+                  <rect x="14" y="14" width="972" height="538" rx="3" fill="none" stroke="#000" stroke-opacity="0.25" stroke-width="1"/>
+                
+                  <!-- Логотип: значок + надпись MONSGEEK.
+                       Координаты логотипа заданы в своей системе (ширина ~1215), поэтому его уменьшаем и ставим по центру. -->
+                  <g transform="translate(281 234) scale(0.36)" fill="#f1f1f1">
+                    <!-- Значок -->
+                    <rect x="35" y="28" width="22" height="214"/>
+                    <rect x="35" y="220" width="235" height="22"/>
+                    <rect x="248" y="28" width="22" height="100"/>
+                    <rect x="248" y="150" width="22" height="92"/>
+                    <polygon points="35,28 62,28 152,92 248,28 270,28 270,52 152,118 35,54"/>
+                    <polygon points="145,168 270,136 270,160 145,192"/>
+                
+                    <!-- Надпись: буквы нарисованы толстыми линиями -->
+                    <g fill="none" stroke="#f1f1f1" stroke-width="24">
+                      <path d="M332 245 V151 L371 203 L410 151 V245"/>
+                      <rect x="443" y="151" width="86" height="84" rx="30"/>
+                      <path d="M742 151 H690 A20.5 20.5 0 0 0 690 192 H711 A21.5 21.5 0 0 1 711 235 H658"/>
+                      <path d="M855 151 H800 A30 30 0 0 0 770 181 V205 A30 30 0 0 0 800 235 H855 V196 H818"/>
+                      <path d="M962 151 H891 V235 H962 M891 193 H950"/>
+                      <path d="M1072 151 H1001 V235 H1072 M1001 193 H1060"/>
+                    </g>
+                    <!-- Буква N: две палочки и диагональ -->
+                    <rect x="553" y="139" width="24" height="106"/>
+                    <rect x="618" y="139" width="24" height="106"/>
+                    <polygon points="553,139 578,139 642,245 617,245"/>
+                    <!-- Буква K: палочка + треугольник -->
+                    <rect x="1095" y="140" width="21" height="105"/>
+                    <polygon points="1124,192 1180,140 1180,245"/>
+                  </g>
+                </svg>
+                <div class="lid-inner"></div>
+                <div class="lid-lip"></div>
+              </div>
+            </div>
+            <!-- дно + задняя и боковые стенки -->
+            <div class="box-part box-rear">
+              <div class="wall wall-back"></div>
+              <div class="wall wall-left"></div>
+              <div class="wall wall-right"></div>
+            </div>
+            <!-- передняя стенка -->
+            <div class="box-part box-front">
+              <div class="wall wall-front"></div>
+            </div>
+          </div>
+
+          <!-- Комплект поставки -->
+          <div class="kit">
+            <h2>Что в коробке</h2>
+            <ul>
+              <li style="--k: 0">Клавиатура</li>
+              <li style="--k: 1">Кабель USB</li>
+              <li style="--k: 2">Беспроводной ресивер</li>
+              <li style="--k: 3">Съёмник кейкапов</li>
+              <li style="--k: 4">Съёмник свитчей</li>
+              <li style="--k: 5">Запасные свитчи</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== Финальный блок ===== -->
+    <section class="outro">
+      <img class="outro-img" src="images/keyboard-render.avif" width="1500" height="1500"
+           alt="Клавиатура MonsGeek M1 V5 и нижняя часть её корпуса парят в воздухе на тёмном фоне">
+      <div class="outro-text">
+        <h2>Итог</h2>
+        <p>
+          Под кейкапами прячется целый «бутерброд»: свитчи, пластина, слои шумоизоляции,
+          мягкие гаскеты и печатная плата — всё это лежит в алюминиевом корпусе.
+          Каждый слой отвечает за своё: звук, мягкость нажатия или удобство ремонта.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Учебный проект</p>
+  </footer>
+
+  <!-- =========================================================
+       Служебный блок: «заготовки» рисунков для слоёв.
+       Он невидим. Слои берут отсюда сетку клавиш через <use href="#...">.
+       Координаты в единицах клавиш: 1 = ширина одной клавиши.
+       Сетку раскладки 75% (82 клавиши) я сгенерировал маленьким скриптом,
+       чтобы не набирать сотни прямоугольников вручную.
+       ========================================================= -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <!-- Маска пластины: белое видно, чёрное — вырезы под свитчи -->
+      <mask id="m-plate" maskUnits="userSpaceOnUse" x="0" y="0" width="17" height="7.25">
+        <rect x="0" y="0" width="17" height="7.25" fill="#fff"/>
+        <use href="#k-holes" x="0" y="0" width="17" height="7.25" fill="#000"/>
+      </mask>
+      <!-- Штриховка для поролона -->
+      <pattern id="p-hatch" width=".22" height=".22" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width=".07" height=".22" fill="#4cc9ff" opacity=".35"/>
+      </pattern>
+      <!-- Точки для нижней шумоизоляции -->
+      <pattern id="p-dots" width=".3" height=".3" patternUnits="userSpaceOnUse">
+        <circle cx=".15" cy=".15" r=".05" fill="#4cc9ff" opacity=".45"/>
+      </pattern>
+      <!-- Градиент металла корпуса -->
+      <linearGradient id="g-case" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4cc9ff" stop-opacity=".22"/>
+        <stop offset="1" stop-color="#4cc9ff" stop-opacity=".06"/>
+      </linearGradient>
+      <!-- Сетка клавиш: колпачки, свитчи, вырезы, гнёзда, светодиоды -->
+      <symbol id="k-caps" viewBox="0 0 17 7.25"><rect x="0.55" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="0.67" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="1.8" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="1.92" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="2.8" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="2.92" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="3.8" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="3.92" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="4.8" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="4.92" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="6.05" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="6.17" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="7.05" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="7.17" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="8.05" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="8.17" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="9.05" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="9.17" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="10.3" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="10.42" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="11.3" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="11.42" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="12.3" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="12.42" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="13.3" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="13.42" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="14.55" y="0.55" width="0.9" height=".9" rx=".1"/><rect x="14.67" y="0.62" width="0.66" height=".62" rx=".08"/><rect x="0.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="0.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="1.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="1.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="2.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="2.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="3.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="3.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="4.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="4.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="5.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="5.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="6.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="6.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="7.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="7.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="8.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="8.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="9.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="9.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="10.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="10.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="11.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="11.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="12.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="12.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="13.55" y="1.8" width="1.9" height=".9" rx=".1"/><rect x="13.67" y="1.87" width="1.66" height=".62" rx=".08"/><rect x="15.55" y="1.8" width="0.9" height=".9" rx=".1"/><rect x="15.67" y="1.87" width="0.66" height=".62" rx=".08"/><rect x="0.55" y="2.8" width="1.4" height=".9" rx=".1"/><rect x="0.67" y="2.87" width="1.16" height=".62" rx=".08"/><rect x="2.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="2.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="3.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="3.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="4.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="4.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="5.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="5.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="6.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="6.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="7.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="7.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="8.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="8.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="9.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="9.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="10.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="10.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="11.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="11.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="12.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="12.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="13.05" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="13.17" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="14.05" y="2.8" width="1.4" height=".9" rx=".1"/><rect x="14.17" y="2.87" width="1.16" height=".62" rx=".08"/><rect x="15.55" y="2.8" width="0.9" height=".9" rx=".1"/><rect x="15.67" y="2.87" width="0.66" height=".62" rx=".08"/><rect x="0.55" y="3.8" width="1.65" height=".9" rx=".1"/><rect x="0.67" y="3.87" width="1.41" height=".62" rx=".08"/><rect x="2.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="2.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="3.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="3.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="4.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="4.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="5.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="5.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="6.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="6.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="7.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="7.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="8.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="8.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="9.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="9.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="10.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="10.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="11.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="11.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="12.3" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="12.42" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="13.3" y="3.8" width="2.15" height=".9" rx=".1"/><rect x="13.42" y="3.87" width="1.91" height=".62" rx=".08"/><rect x="15.55" y="3.8" width="0.9" height=".9" rx=".1"/><rect x="15.67" y="3.87" width="0.66" height=".62" rx=".08"/><rect x="0.55" y="4.8" width="2.15" height=".9" rx=".1"/><rect x="0.67" y="4.87" width="1.91" height=".62" rx=".08"/><rect x="2.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="2.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="3.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="3.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="4.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="4.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="5.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="5.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="6.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="6.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="7.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="7.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="8.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="8.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="9.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="9.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="10.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="10.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="11.8" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="11.92" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="12.8" y="4.8" width="1.65" height=".9" rx=".1"/><rect x="12.92" y="4.87" width="1.41" height=".62" rx=".08"/><rect x="14.55" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="14.67" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="15.55" y="4.8" width="0.9" height=".9" rx=".1"/><rect x="15.67" y="4.87" width="0.66" height=".62" rx=".08"/><rect x="0.55" y="5.8" width="1.15" height=".9" rx=".1"/><rect x="0.67" y="5.87" width="0.91" height=".62" rx=".08"/><rect x="1.8" y="5.8" width="1.15" height=".9" rx=".1"/><rect x="1.92" y="5.87" width="0.91" height=".62" rx=".08"/><rect x="3.05" y="5.8" width="1.15" height=".9" rx=".1"/><rect x="3.17" y="5.87" width="0.91" height=".62" rx=".08"/><rect x="4.3" y="5.8" width="6.15" height=".9" rx=".1"/><rect x="4.42" y="5.87" width="5.91" height=".62" rx=".08"/><rect x="10.55" y="5.8" width="0.9" height=".9" rx=".1"/><rect x="10.67" y="5.87" width="0.66" height=".62" rx=".08"/><rect x="11.55" y="5.8" width="0.9" height=".9" rx=".1"/><rect x="11.67" y="5.87" width="0.66" height=".62" rx=".08"/><rect x="12.55" y="5.8" width="0.9" height=".9" rx=".1"/><rect x="12.67" y="5.87" width="0.66" height=".62" rx=".08"/><rect x="13.55" y="5.8" width="0.9" height=".9" rx=".1"/><rect x="13.67" y="5.87" width="0.66" height=".62" rx=".08"/><rect x="14.55" y="5.8" width="0.9" height=".9" rx=".1"/><rect x="14.67" y="5.87" width="0.66" height=".62" rx=".08"/><rect x="15.55" y="5.8" width="0.9" height=".9" rx=".1"/><rect x="15.67" y="5.87" width="0.66" height=".62" rx=".08"/></symbol>
+      <symbol id="k-switches" viewBox="0 0 17 7.25"><rect x="0.7" y="0.7" width=".6" height=".6" rx=".06"/><path d="M0.9 1H1.1M1 0.9V1.1"/><rect x="1.95" y="0.7" width=".6" height=".6" rx=".06"/><path d="M2.15 1H2.35M2.25 0.9V1.1"/><rect x="2.95" y="0.7" width=".6" height=".6" rx=".06"/><path d="M3.15 1H3.35M3.25 0.9V1.1"/><rect x="3.95" y="0.7" width=".6" height=".6" rx=".06"/><path d="M4.15 1H4.35M4.25 0.9V1.1"/><rect x="4.95" y="0.7" width=".6" height=".6" rx=".06"/><path d="M5.15 1H5.35M5.25 0.9V1.1"/><rect x="6.2" y="0.7" width=".6" height=".6" rx=".06"/><path d="M6.4 1H6.6M6.5 0.9V1.1"/><rect x="7.2" y="0.7" width=".6" height=".6" rx=".06"/><path d="M7.4 1H7.6M7.5 0.9V1.1"/><rect x="8.2" y="0.7" width=".6" height=".6" rx=".06"/><path d="M8.4 1H8.6M8.5 0.9V1.1"/><rect x="9.2" y="0.7" width=".6" height=".6" rx=".06"/><path d="M9.4 1H9.6M9.5 0.9V1.1"/><rect x="10.45" y="0.7" width=".6" height=".6" rx=".06"/><path d="M10.65 1H10.85M10.75 0.9V1.1"/><rect x="11.45" y="0.7" width=".6" height=".6" rx=".06"/><path d="M11.65 1H11.85M11.75 0.9V1.1"/><rect x="12.45" y="0.7" width=".6" height=".6" rx=".06"/><path d="M12.65 1H12.85M12.75 0.9V1.1"/><rect x="13.45" y="0.7" width=".6" height=".6" rx=".06"/><path d="M13.65 1H13.85M13.75 0.9V1.1"/><rect x="14.7" y="0.7" width=".6" height=".6" rx=".06"/><path d="M14.9 1H15.1M15 0.9V1.1"/><rect x="0.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M0.9 2.25H1.1M1 2.15V2.35"/><rect x="1.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M1.9 2.25H2.1M2 2.15V2.35"/><rect x="2.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M2.9 2.25H3.1M3 2.15V2.35"/><rect x="3.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M3.9 2.25H4.1M4 2.15V2.35"/><rect x="4.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M4.9 2.25H5.1M5 2.15V2.35"/><rect x="5.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M5.9 2.25H6.1M6 2.15V2.35"/><rect x="6.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M6.9 2.25H7.1M7 2.15V2.35"/><rect x="7.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M7.9 2.25H8.1M8 2.15V2.35"/><rect x="8.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M8.9 2.25H9.1M9 2.15V2.35"/><rect x="9.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M9.9 2.25H10.1M10 2.15V2.35"/><rect x="10.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M10.9 2.25H11.1M11 2.15V2.35"/><rect x="11.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M11.9 2.25H12.1M12 2.15V2.35"/><rect x="12.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M12.9 2.25H13.1M13 2.15V2.35"/><rect x="14.2" y="1.95" width=".6" height=".6" rx=".06"/><path d="M14.4 2.25H14.6M14.5 2.15V2.35"/><rect x="15.7" y="1.95" width=".6" height=".6" rx=".06"/><path d="M15.9 2.25H16.1M16 2.15V2.35"/><rect x="0.95" y="2.95" width=".6" height=".6" rx=".06"/><path d="M1.15 3.25H1.35M1.25 3.15V3.35"/><rect x="2.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M2.4 3.25H2.6M2.5 3.15V3.35"/><rect x="3.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M3.4 3.25H3.6M3.5 3.15V3.35"/><rect x="4.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M4.4 3.25H4.6M4.5 3.15V3.35"/><rect x="5.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M5.4 3.25H5.6M5.5 3.15V3.35"/><rect x="6.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M6.4 3.25H6.6M6.5 3.15V3.35"/><rect x="7.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M7.4 3.25H7.6M7.5 3.15V3.35"/><rect x="8.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M8.4 3.25H8.6M8.5 3.15V3.35"/><rect x="9.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M9.4 3.25H9.6M9.5 3.15V3.35"/><rect x="10.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M10.4 3.25H10.6M10.5 3.15V3.35"/><rect x="11.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M11.4 3.25H11.6M11.5 3.15V3.35"/><rect x="12.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M12.4 3.25H12.6M12.5 3.15V3.35"/><rect x="13.2" y="2.95" width=".6" height=".6" rx=".06"/><path d="M13.4 3.25H13.6M13.5 3.15V3.35"/><rect x="14.45" y="2.95" width=".6" height=".6" rx=".06"/><path d="M14.65 3.25H14.85M14.75 3.15V3.35"/><rect x="15.7" y="2.95" width=".6" height=".6" rx=".06"/><path d="M15.9 3.25H16.1M16 3.15V3.35"/><rect x="1.07" y="3.95" width=".6" height=".6" rx=".06"/><path d="M1.27 4.25H1.48M1.38 4.15V4.35"/><rect x="2.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M2.65 4.25H2.85M2.75 4.15V4.35"/><rect x="3.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M3.65 4.25H3.85M3.75 4.15V4.35"/><rect x="4.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M4.65 4.25H4.85M4.75 4.15V4.35"/><rect x="5.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M5.65 4.25H5.85M5.75 4.15V4.35"/><rect x="6.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M6.65 4.25H6.85M6.75 4.15V4.35"/><rect x="7.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M7.65 4.25H7.85M7.75 4.15V4.35"/><rect x="8.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M8.65 4.25H8.85M8.75 4.15V4.35"/><rect x="9.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M9.65 4.25H9.85M9.75 4.15V4.35"/><rect x="10.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M10.65 4.25H10.85M10.75 4.15V4.35"/><rect x="11.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M11.65 4.25H11.85M11.75 4.15V4.35"/><rect x="12.45" y="3.95" width=".6" height=".6" rx=".06"/><path d="M12.65 4.25H12.85M12.75 4.15V4.35"/><rect x="14.07" y="3.95" width=".6" height=".6" rx=".06"/><path d="M14.28 4.25H14.47M14.38 4.15V4.35"/><rect x="15.7" y="3.95" width=".6" height=".6" rx=".06"/><path d="M15.9 4.25H16.1M16 4.15V4.35"/><rect x="1.32" y="4.95" width=".6" height=".6" rx=".06"/><path d="M1.52 5.25H1.73M1.62 5.15V5.35"/><rect x="2.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M3.15 5.25H3.35M3.25 5.15V5.35"/><rect x="3.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M4.15 5.25H4.35M4.25 5.15V5.35"/><rect x="4.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M5.15 5.25H5.35M5.25 5.15V5.35"/><rect x="5.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M6.15 5.25H6.35M6.25 5.15V5.35"/><rect x="6.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M7.15 5.25H7.35M7.25 5.15V5.35"/><rect x="7.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M8.15 5.25H8.35M8.25 5.15V5.35"/><rect x="8.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M9.15 5.25H9.35M9.25 5.15V5.35"/><rect x="9.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M10.15 5.25H10.35M10.25 5.15V5.35"/><rect x="10.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M11.15 5.25H11.35M11.25 5.15V5.35"/><rect x="11.95" y="4.95" width=".6" height=".6" rx=".06"/><path d="M12.15 5.25H12.35M12.25 5.15V5.35"/><rect x="13.32" y="4.95" width=".6" height=".6" rx=".06"/><path d="M13.53 5.25H13.72M13.62 5.15V5.35"/><rect x="14.7" y="4.95" width=".6" height=".6" rx=".06"/><path d="M14.9 5.25H15.1M15 5.15V5.35"/><rect x="15.7" y="4.95" width=".6" height=".6" rx=".06"/><path d="M15.9 5.25H16.1M16 5.15V5.35"/><rect x="0.82" y="5.95" width=".6" height=".6" rx=".06"/><path d="M1.02 6.25H1.23M1.12 6.15V6.35"/><rect x="2.08" y="5.95" width=".6" height=".6" rx=".06"/><path d="M2.27 6.25H2.48M2.38 6.15V6.35"/><rect x="3.33" y="5.95" width=".6" height=".6" rx=".06"/><path d="M3.52 6.25H3.73M3.62 6.15V6.35"/><rect x="7.08" y="5.95" width=".6" height=".6" rx=".06"/><path d="M7.28 6.25H7.47M7.38 6.15V6.35"/><rect x="10.7" y="5.95" width=".6" height=".6" rx=".06"/><path d="M10.9 6.25H11.1M11 6.15V6.35"/><rect x="11.7" y="5.95" width=".6" height=".6" rx=".06"/><path d="M11.9 6.25H12.1M12 6.15V6.35"/><rect x="12.7" y="5.95" width=".6" height=".6" rx=".06"/><path d="M12.9 6.25H13.1M13 6.15V6.35"/><rect x="13.7" y="5.95" width=".6" height=".6" rx=".06"/><path d="M13.9 6.25H14.1M14 6.15V6.35"/><rect x="14.7" y="5.95" width=".6" height=".6" rx=".06"/><path d="M14.9 6.25H15.1M15 6.15V6.35"/><rect x="15.7" y="5.95" width=".6" height=".6" rx=".06"/><path d="M15.9 6.25H16.1M16 6.15V6.35"/></symbol>
+      <symbol id="k-holes" viewBox="0 0 17 7.25"><rect x="0.72" y="0.72" width=".56" height=".56"/><rect x="1.97" y="0.72" width=".56" height=".56"/><rect x="2.97" y="0.72" width=".56" height=".56"/><rect x="3.97" y="0.72" width=".56" height=".56"/><rect x="4.97" y="0.72" width=".56" height=".56"/><rect x="6.22" y="0.72" width=".56" height=".56"/><rect x="7.22" y="0.72" width=".56" height=".56"/><rect x="8.22" y="0.72" width=".56" height=".56"/><rect x="9.22" y="0.72" width=".56" height=".56"/><rect x="10.47" y="0.72" width=".56" height=".56"/><rect x="11.47" y="0.72" width=".56" height=".56"/><rect x="12.47" y="0.72" width=".56" height=".56"/><rect x="13.47" y="0.72" width=".56" height=".56"/><rect x="14.72" y="0.72" width=".56" height=".56"/><rect x="0.72" y="1.97" width=".56" height=".56"/><rect x="1.72" y="1.97" width=".56" height=".56"/><rect x="2.72" y="1.97" width=".56" height=".56"/><rect x="3.72" y="1.97" width=".56" height=".56"/><rect x="4.72" y="1.97" width=".56" height=".56"/><rect x="5.72" y="1.97" width=".56" height=".56"/><rect x="6.72" y="1.97" width=".56" height=".56"/><rect x="7.72" y="1.97" width=".56" height=".56"/><rect x="8.72" y="1.97" width=".56" height=".56"/><rect x="9.72" y="1.97" width=".56" height=".56"/><rect x="10.72" y="1.97" width=".56" height=".56"/><rect x="11.72" y="1.97" width=".56" height=".56"/><rect x="12.72" y="1.97" width=".56" height=".56"/><rect x="14.22" y="1.97" width=".56" height=".56"/><rect x="15.72" y="1.97" width=".56" height=".56"/><rect x="0.97" y="2.97" width=".56" height=".56"/><rect x="2.22" y="2.97" width=".56" height=".56"/><rect x="3.22" y="2.97" width=".56" height=".56"/><rect x="4.22" y="2.97" width=".56" height=".56"/><rect x="5.22" y="2.97" width=".56" height=".56"/><rect x="6.22" y="2.97" width=".56" height=".56"/><rect x="7.22" y="2.97" width=".56" height=".56"/><rect x="8.22" y="2.97" width=".56" height=".56"/><rect x="9.22" y="2.97" width=".56" height=".56"/><rect x="10.22" y="2.97" width=".56" height=".56"/><rect x="11.22" y="2.97" width=".56" height=".56"/><rect x="12.22" y="2.97" width=".56" height=".56"/><rect x="13.22" y="2.97" width=".56" height=".56"/><rect x="14.47" y="2.97" width=".56" height=".56"/><rect x="15.72" y="2.97" width=".56" height=".56"/><rect x="1.09" y="3.97" width=".56" height=".56"/><rect x="2.47" y="3.97" width=".56" height=".56"/><rect x="3.47" y="3.97" width=".56" height=".56"/><rect x="4.47" y="3.97" width=".56" height=".56"/><rect x="5.47" y="3.97" width=".56" height=".56"/><rect x="6.47" y="3.97" width=".56" height=".56"/><rect x="7.47" y="3.97" width=".56" height=".56"/><rect x="8.47" y="3.97" width=".56" height=".56"/><rect x="9.47" y="3.97" width=".56" height=".56"/><rect x="10.47" y="3.97" width=".56" height=".56"/><rect x="11.47" y="3.97" width=".56" height=".56"/><rect x="12.47" y="3.97" width=".56" height=".56"/><rect x="14.1" y="3.97" width=".56" height=".56"/><rect x="15.72" y="3.97" width=".56" height=".56"/><rect x="1.34" y="4.97" width=".56" height=".56"/><rect x="2.97" y="4.97" width=".56" height=".56"/><rect x="3.97" y="4.97" width=".56" height=".56"/><rect x="4.97" y="4.97" width=".56" height=".56"/><rect x="5.97" y="4.97" width=".56" height=".56"/><rect x="6.97" y="4.97" width=".56" height=".56"/><rect x="7.97" y="4.97" width=".56" height=".56"/><rect x="8.97" y="4.97" width=".56" height=".56"/><rect x="9.97" y="4.97" width=".56" height=".56"/><rect x="10.97" y="4.97" width=".56" height=".56"/><rect x="11.97" y="4.97" width=".56" height=".56"/><rect x="13.35" y="4.97" width=".56" height=".56"/><rect x="14.72" y="4.97" width=".56" height=".56"/><rect x="15.72" y="4.97" width=".56" height=".56"/><rect x="0.84" y="5.97" width=".56" height=".56"/><rect x="2.09" y="5.97" width=".56" height=".56"/><rect x="3.34" y="5.97" width=".56" height=".56"/><rect x="7.09" y="5.97" width=".56" height=".56"/><rect x="10.72" y="5.97" width=".56" height=".56"/><rect x="11.72" y="5.97" width=".56" height=".56"/><rect x="12.72" y="5.97" width=".56" height=".56"/><rect x="13.72" y="5.97" width=".56" height=".56"/><rect x="14.72" y="5.97" width=".56" height=".56"/><rect x="15.72" y="5.97" width=".56" height=".56"/></symbol>
+      <symbol id="k-sockets" viewBox="0 0 17 7.25"><circle cx="1" cy="1" r=".09"/><circle cx="0.8" cy="0.82" r=".05"/><circle cx="1.13" cy="0.76" r=".05"/><circle cx="2.25" cy="1" r=".09"/><circle cx="2.05" cy="0.82" r=".05"/><circle cx="2.38" cy="0.76" r=".05"/><circle cx="3.25" cy="1" r=".09"/><circle cx="3.05" cy="0.82" r=".05"/><circle cx="3.38" cy="0.76" r=".05"/><circle cx="4.25" cy="1" r=".09"/><circle cx="4.05" cy="0.82" r=".05"/><circle cx="4.38" cy="0.76" r=".05"/><circle cx="5.25" cy="1" r=".09"/><circle cx="5.05" cy="0.82" r=".05"/><circle cx="5.38" cy="0.76" r=".05"/><circle cx="6.5" cy="1" r=".09"/><circle cx="6.3" cy="0.82" r=".05"/><circle cx="6.63" cy="0.76" r=".05"/><circle cx="7.5" cy="1" r=".09"/><circle cx="7.3" cy="0.82" r=".05"/><circle cx="7.63" cy="0.76" r=".05"/><circle cx="8.5" cy="1" r=".09"/><circle cx="8.3" cy="0.82" r=".05"/><circle cx="8.63" cy="0.76" r=".05"/><circle cx="9.5" cy="1" r=".09"/><circle cx="9.3" cy="0.82" r=".05"/><circle cx="9.63" cy="0.76" r=".05"/><circle cx="10.75" cy="1" r=".09"/><circle cx="10.55" cy="0.82" r=".05"/><circle cx="10.88" cy="0.76" r=".05"/><circle cx="11.75" cy="1" r=".09"/><circle cx="11.55" cy="0.82" r=".05"/><circle cx="11.88" cy="0.76" r=".05"/><circle cx="12.75" cy="1" r=".09"/><circle cx="12.55" cy="0.82" r=".05"/><circle cx="12.88" cy="0.76" r=".05"/><circle cx="13.75" cy="1" r=".09"/><circle cx="13.55" cy="0.82" r=".05"/><circle cx="13.88" cy="0.76" r=".05"/><circle cx="15" cy="1" r=".09"/><circle cx="14.8" cy="0.82" r=".05"/><circle cx="15.13" cy="0.76" r=".05"/><circle cx="1" cy="2.25" r=".09"/><circle cx="0.8" cy="2.07" r=".05"/><circle cx="1.13" cy="2.01" r=".05"/><circle cx="2" cy="2.25" r=".09"/><circle cx="1.8" cy="2.07" r=".05"/><circle cx="2.13" cy="2.01" r=".05"/><circle cx="3" cy="2.25" r=".09"/><circle cx="2.8" cy="2.07" r=".05"/><circle cx="3.13" cy="2.01" r=".05"/><circle cx="4" cy="2.25" r=".09"/><circle cx="3.8" cy="2.07" r=".05"/><circle cx="4.13" cy="2.01" r=".05"/><circle cx="5" cy="2.25" r=".09"/><circle cx="4.8" cy="2.07" r=".05"/><circle cx="5.13" cy="2.01" r=".05"/><circle cx="6" cy="2.25" r=".09"/><circle cx="5.8" cy="2.07" r=".05"/><circle cx="6.13" cy="2.01" r=".05"/><circle cx="7" cy="2.25" r=".09"/><circle cx="6.8" cy="2.07" r=".05"/><circle cx="7.13" cy="2.01" r=".05"/><circle cx="8" cy="2.25" r=".09"/><circle cx="7.8" cy="2.07" r=".05"/><circle cx="8.13" cy="2.01" r=".05"/><circle cx="9" cy="2.25" r=".09"/><circle cx="8.8" cy="2.07" r=".05"/><circle cx="9.13" cy="2.01" r=".05"/><circle cx="10" cy="2.25" r=".09"/><circle cx="9.8" cy="2.07" r=".05"/><circle cx="10.13" cy="2.01" r=".05"/><circle cx="11" cy="2.25" r=".09"/><circle cx="10.8" cy="2.07" r=".05"/><circle cx="11.13" cy="2.01" r=".05"/><circle cx="12" cy="2.25" r=".09"/><circle cx="11.8" cy="2.07" r=".05"/><circle cx="12.13" cy="2.01" r=".05"/><circle cx="13" cy="2.25" r=".09"/><circle cx="12.8" cy="2.07" r=".05"/><circle cx="13.13" cy="2.01" r=".05"/><circle cx="14.5" cy="2.25" r=".09"/><circle cx="14.3" cy="2.07" r=".05"/><circle cx="14.63" cy="2.01" r=".05"/><circle cx="16" cy="2.25" r=".09"/><circle cx="15.8" cy="2.07" r=".05"/><circle cx="16.13" cy="2.01" r=".05"/><circle cx="1.25" cy="3.25" r=".09"/><circle cx="1.05" cy="3.07" r=".05"/><circle cx="1.38" cy="3.01" r=".05"/><circle cx="2.5" cy="3.25" r=".09"/><circle cx="2.3" cy="3.07" r=".05"/><circle cx="2.63" cy="3.01" r=".05"/><circle cx="3.5" cy="3.25" r=".09"/><circle cx="3.3" cy="3.07" r=".05"/><circle cx="3.63" cy="3.01" r=".05"/><circle cx="4.5" cy="3.25" r=".09"/><circle cx="4.3" cy="3.07" r=".05"/><circle cx="4.63" cy="3.01" r=".05"/><circle cx="5.5" cy="3.25" r=".09"/><circle cx="5.3" cy="3.07" r=".05"/><circle cx="5.63" cy="3.01" r=".05"/><circle cx="6.5" cy="3.25" r=".09"/><circle cx="6.3" cy="3.07" r=".05"/><circle cx="6.63" cy="3.01" r=".05"/><circle cx="7.5" cy="3.25" r=".09"/><circle cx="7.3" cy="3.07" r=".05"/><circle cx="7.63" cy="3.01" r=".05"/><circle cx="8.5" cy="3.25" r=".09"/><circle cx="8.3" cy="3.07" r=".05"/><circle cx="8.63" cy="3.01" r=".05"/><circle cx="9.5" cy="3.25" r=".09"/><circle cx="9.3" cy="3.07" r=".05"/><circle cx="9.63" cy="3.01" r=".05"/><circle cx="10.5" cy="3.25" r=".09"/><circle cx="10.3" cy="3.07" r=".05"/><circle cx="10.63" cy="3.01" r=".05"/><circle cx="11.5" cy="3.25" r=".09"/><circle cx="11.3" cy="3.07" r=".05"/><circle cx="11.63" cy="3.01" r=".05"/><circle cx="12.5" cy="3.25" r=".09"/><circle cx="12.3" cy="3.07" r=".05"/><circle cx="12.63" cy="3.01" r=".05"/><circle cx="13.5" cy="3.25" r=".09"/><circle cx="13.3" cy="3.07" r=".05"/><circle cx="13.63" cy="3.01" r=".05"/><circle cx="14.75" cy="3.25" r=".09"/><circle cx="14.55" cy="3.07" r=".05"/><circle cx="14.88" cy="3.01" r=".05"/><circle cx="16" cy="3.25" r=".09"/><circle cx="15.8" cy="3.07" r=".05"/><circle cx="16.13" cy="3.01" r=".05"/><circle cx="1.38" cy="4.25" r=".09"/><circle cx="1.18" cy="4.07" r=".05"/><circle cx="1.5" cy="4.01" r=".05"/><circle cx="2.75" cy="4.25" r=".09"/><circle cx="2.55" cy="4.07" r=".05"/><circle cx="2.88" cy="4.01" r=".05"/><circle cx="3.75" cy="4.25" r=".09"/><circle cx="3.55" cy="4.07" r=".05"/><circle cx="3.88" cy="4.01" r=".05"/><circle cx="4.75" cy="4.25" r=".09"/><circle cx="4.55" cy="4.07" r=".05"/><circle cx="4.88" cy="4.01" r=".05"/><circle cx="5.75" cy="4.25" r=".09"/><circle cx="5.55" cy="4.07" r=".05"/><circle cx="5.88" cy="4.01" r=".05"/><circle cx="6.75" cy="4.25" r=".09"/><circle cx="6.55" cy="4.07" r=".05"/><circle cx="6.88" cy="4.01" r=".05"/><circle cx="7.75" cy="4.25" r=".09"/><circle cx="7.55" cy="4.07" r=".05"/><circle cx="7.88" cy="4.01" r=".05"/><circle cx="8.75" cy="4.25" r=".09"/><circle cx="8.55" cy="4.07" r=".05"/><circle cx="8.88" cy="4.01" r=".05"/><circle cx="9.75" cy="4.25" r=".09"/><circle cx="9.55" cy="4.07" r=".05"/><circle cx="9.88" cy="4.01" r=".05"/><circle cx="10.75" cy="4.25" r=".09"/><circle cx="10.55" cy="4.07" r=".05"/><circle cx="10.88" cy="4.01" r=".05"/><circle cx="11.75" cy="4.25" r=".09"/><circle cx="11.55" cy="4.07" r=".05"/><circle cx="11.88" cy="4.01" r=".05"/><circle cx="12.75" cy="4.25" r=".09"/><circle cx="12.55" cy="4.07" r=".05"/><circle cx="12.88" cy="4.01" r=".05"/><circle cx="14.38" cy="4.25" r=".09"/><circle cx="14.18" cy="4.07" r=".05"/><circle cx="14.51" cy="4.01" r=".05"/><circle cx="16" cy="4.25" r=".09"/><circle cx="15.8" cy="4.07" r=".05"/><circle cx="16.13" cy="4.01" r=".05"/><circle cx="1.62" cy="5.25" r=".09"/><circle cx="1.43" cy="5.07" r=".05"/><circle cx="1.75" cy="5.01" r=".05"/><circle cx="3.25" cy="5.25" r=".09"/><circle cx="3.05" cy="5.07" r=".05"/><circle cx="3.38" cy="5.01" r=".05"/><circle cx="4.25" cy="5.25" r=".09"/><circle cx="4.05" cy="5.07" r=".05"/><circle cx="4.38" cy="5.01" r=".05"/><circle cx="5.25" cy="5.25" r=".09"/><circle cx="5.05" cy="5.07" r=".05"/><circle cx="5.38" cy="5.01" r=".05"/><circle cx="6.25" cy="5.25" r=".09"/><circle cx="6.05" cy="5.07" r=".05"/><circle cx="6.38" cy="5.01" r=".05"/><circle cx="7.25" cy="5.25" r=".09"/><circle cx="7.05" cy="5.07" r=".05"/><circle cx="7.38" cy="5.01" r=".05"/><circle cx="8.25" cy="5.25" r=".09"/><circle cx="8.05" cy="5.07" r=".05"/><circle cx="8.38" cy="5.01" r=".05"/><circle cx="9.25" cy="5.25" r=".09"/><circle cx="9.05" cy="5.07" r=".05"/><circle cx="9.38" cy="5.01" r=".05"/><circle cx="10.25" cy="5.25" r=".09"/><circle cx="10.05" cy="5.07" r=".05"/><circle cx="10.38" cy="5.01" r=".05"/><circle cx="11.25" cy="5.25" r=".09"/><circle cx="11.05" cy="5.07" r=".05"/><circle cx="11.38" cy="5.01" r=".05"/><circle cx="12.25" cy="5.25" r=".09"/><circle cx="12.05" cy="5.07" r=".05"/><circle cx="12.38" cy="5.01" r=".05"/><circle cx="13.62" cy="5.25" r=".09"/><circle cx="13.43" cy="5.07" r=".05"/><circle cx="13.76" cy="5.01" r=".05"/><circle cx="15" cy="5.25" r=".09"/><circle cx="14.8" cy="5.07" r=".05"/><circle cx="15.13" cy="5.01" r=".05"/><circle cx="16" cy="5.25" r=".09"/><circle cx="15.8" cy="5.07" r=".05"/><circle cx="16.13" cy="5.01" r=".05"/><circle cx="1.12" cy="6.25" r=".09"/><circle cx="0.93" cy="6.07" r=".05"/><circle cx="1.25" cy="6.01" r=".05"/><circle cx="2.38" cy="6.25" r=".09"/><circle cx="2.17" cy="6.07" r=".05"/><circle cx="2.5" cy="6.01" r=".05"/><circle cx="3.62" cy="6.25" r=".09"/><circle cx="3.42" cy="6.07" r=".05"/><circle cx="3.75" cy="6.01" r=".05"/><circle cx="7.38" cy="6.25" r=".09"/><circle cx="7.17" cy="6.07" r=".05"/><circle cx="7.5" cy="6.01" r=".05"/><circle cx="11" cy="6.25" r=".09"/><circle cx="10.8" cy="6.07" r=".05"/><circle cx="11.13" cy="6.01" r=".05"/><circle cx="12" cy="6.25" r=".09"/><circle cx="11.8" cy="6.07" r=".05"/><circle cx="12.13" cy="6.01" r=".05"/><circle cx="13" cy="6.25" r=".09"/><circle cx="12.8" cy="6.07" r=".05"/><circle cx="13.13" cy="6.01" r=".05"/><circle cx="14" cy="6.25" r=".09"/><circle cx="13.8" cy="6.07" r=".05"/><circle cx="14.13" cy="6.01" r=".05"/><circle cx="15" cy="6.25" r=".09"/><circle cx="14.8" cy="6.07" r=".05"/><circle cx="15.13" cy="6.01" r=".05"/><circle cx="16" cy="6.25" r=".09"/><circle cx="15.8" cy="6.07" r=".05"/><circle cx="16.13" cy="6.01" r=".05"/></symbol>
+      <symbol id="k-leds" viewBox="0 0 17 7.25"><rect x="0.91" y="1.25" width=".18" height=".1"/><rect x="2.16" y="1.25" width=".18" height=".1"/><rect x="3.16" y="1.25" width=".18" height=".1"/><rect x="4.16" y="1.25" width=".18" height=".1"/><rect x="5.16" y="1.25" width=".18" height=".1"/><rect x="6.41" y="1.25" width=".18" height=".1"/><rect x="7.41" y="1.25" width=".18" height=".1"/><rect x="8.41" y="1.25" width=".18" height=".1"/><rect x="9.41" y="1.25" width=".18" height=".1"/><rect x="10.66" y="1.25" width=".18" height=".1"/><rect x="11.66" y="1.25" width=".18" height=".1"/><rect x="12.66" y="1.25" width=".18" height=".1"/><rect x="13.66" y="1.25" width=".18" height=".1"/><rect x="14.91" y="1.25" width=".18" height=".1"/><rect x="0.91" y="2.5" width=".18" height=".1"/><rect x="1.91" y="2.5" width=".18" height=".1"/><rect x="2.91" y="2.5" width=".18" height=".1"/><rect x="3.91" y="2.5" width=".18" height=".1"/><rect x="4.91" y="2.5" width=".18" height=".1"/><rect x="5.91" y="2.5" width=".18" height=".1"/><rect x="6.91" y="2.5" width=".18" height=".1"/><rect x="7.91" y="2.5" width=".18" height=".1"/><rect x="8.91" y="2.5" width=".18" height=".1"/><rect x="9.91" y="2.5" width=".18" height=".1"/><rect x="10.91" y="2.5" width=".18" height=".1"/><rect x="11.91" y="2.5" width=".18" height=".1"/><rect x="12.91" y="2.5" width=".18" height=".1"/><rect x="14.41" y="2.5" width=".18" height=".1"/><rect x="15.91" y="2.5" width=".18" height=".1"/><rect x="1.16" y="3.5" width=".18" height=".1"/><rect x="2.41" y="3.5" width=".18" height=".1"/><rect x="3.41" y="3.5" width=".18" height=".1"/><rect x="4.41" y="3.5" width=".18" height=".1"/><rect x="5.41" y="3.5" width=".18" height=".1"/><rect x="6.41" y="3.5" width=".18" height=".1"/><rect x="7.41" y="3.5" width=".18" height=".1"/><rect x="8.41" y="3.5" width=".18" height=".1"/><rect x="9.41" y="3.5" width=".18" height=".1"/><rect x="10.41" y="3.5" width=".18" height=".1"/><rect x="11.41" y="3.5" width=".18" height=".1"/><rect x="12.41" y="3.5" width=".18" height=".1"/><rect x="13.41" y="3.5" width=".18" height=".1"/><rect x="14.66" y="3.5" width=".18" height=".1"/><rect x="15.91" y="3.5" width=".18" height=".1"/><rect x="1.28" y="4.5" width=".18" height=".1"/><rect x="2.66" y="4.5" width=".18" height=".1"/><rect x="3.66" y="4.5" width=".18" height=".1"/><rect x="4.66" y="4.5" width=".18" height=".1"/><rect x="5.66" y="4.5" width=".18" height=".1"/><rect x="6.66" y="4.5" width=".18" height=".1"/><rect x="7.66" y="4.5" width=".18" height=".1"/><rect x="8.66" y="4.5" width=".18" height=".1"/><rect x="9.66" y="4.5" width=".18" height=".1"/><rect x="10.66" y="4.5" width=".18" height=".1"/><rect x="11.66" y="4.5" width=".18" height=".1"/><rect x="12.66" y="4.5" width=".18" height=".1"/><rect x="14.29" y="4.5" width=".18" height=".1"/><rect x="15.91" y="4.5" width=".18" height=".1"/><rect x="1.53" y="5.5" width=".18" height=".1"/><rect x="3.16" y="5.5" width=".18" height=".1"/><rect x="4.16" y="5.5" width=".18" height=".1"/><rect x="5.16" y="5.5" width=".18" height=".1"/><rect x="6.16" y="5.5" width=".18" height=".1"/><rect x="7.16" y="5.5" width=".18" height=".1"/><rect x="8.16" y="5.5" width=".18" height=".1"/><rect x="9.16" y="5.5" width=".18" height=".1"/><rect x="10.16" y="5.5" width=".18" height=".1"/><rect x="11.16" y="5.5" width=".18" height=".1"/><rect x="12.16" y="5.5" width=".18" height=".1"/><rect x="13.54" y="5.5" width=".18" height=".1"/><rect x="14.91" y="5.5" width=".18" height=".1"/><rect x="15.91" y="5.5" width=".18" height=".1"/><rect x="1.03" y="6.5" width=".18" height=".1"/><rect x="2.29" y="6.5" width=".18" height=".1"/><rect x="3.54" y="6.5" width=".18" height=".1"/><rect x="7.29" y="6.5" width=".18" height=".1"/><rect x="10.91" y="6.5" width=".18" height=".1"/><rect x="11.91" y="6.5" width=".18" height=".1"/><rect x="12.91" y="6.5" width=".18" height=".1"/><rect x="13.91" y="6.5" width=".18" height=".1"/><rect x="14.91" y="6.5" width=".18" height=".1"/><rect x="15.91" y="6.5" width=".18" height=".1"/></symbol>
+    </defs>
+  </svg>
+
+</body>
+</html>

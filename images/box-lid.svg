@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 566" role="img" aria-label="Крышка коробки MonsGeek">
+  <!-- Перерисованная крышка коробки MonsGeek (вид сверху).
+       Матовый чёрный картон с тонкой вертикальной фактурой и белым логотипом. -->
+  <defs>
+    <!-- Лёгкий градиент: свет падает сверху -->
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3c40"/>
+      <stop offset="0.55" stop-color="#2e3033"/>
+      <stop offset="1" stop-color="#25272a"/>
+    </linearGradient>
+    <!-- Фактура гофрокартона: еле заметные вертикальные полоски -->
+    <pattern id="ribs" width="6" height="10" patternUnits="userSpaceOnUse">
+      <rect width="3" height="10" fill="#ffffff" opacity="0.018"/>
+    </pattern>
+  </defs>
+
+  <!-- Основа крышки -->
+  <rect x="0" y="0" width="1000" height="566" rx="6" fill="url(#paper)"/>
+  <rect x="0" y="0" width="1000" height="566" rx="6" fill="url(#ribs)"/>
+  <!-- Светлый кант по краю (загиб картона) -->
+  <rect x="3" y="3" width="994" height="560" rx="5" fill="none" stroke="#4a4d52" stroke-width="2"/>
+  <rect x="14" y="14" width="972" height="538" rx="3" fill="none" stroke="#000" stroke-opacity="0.25" stroke-width="1"/>
+
+  <!-- Логотип: значок + надпись MONSGEEK.
+       Координаты логотипа заданы в своей системе (ширина ~1215), поэтому его уменьшаем и ставим по центру. -->
+  <g transform="translate(281 234) scale(0.36)" fill="#f1f1f1">
+    <!-- Значок -->
+    <rect x="35" y="28" width="22" height="214"/>
+    <rect x="35" y="220" width="235" height="22"/>
+    <rect x="248" y="28" width="22" height="100"/>
+    <rect x="248" y="150" width="22" height="92"/>
+    <polygon points="35,28 62,28 152,92 248,28 270,28 270,52 152,118 35,54"/>
+    <polygon points="145,168 270,136 270,160 145,192"/>
+
+    <!-- Надпись: буквы нарисованы толстыми линиями -->
+    <g fill="none" stroke="#f1f1f1" stroke-width="24">
+      <path d="M332 245 V151 L371 203 L410 151 V245"/>
+      <rect x="443" y="151" width="86" height="84" rx="30"/>
+      <path d="M742 151 H690 A20.5 20.5 0 0 0 690 192 H711 A21.5 21.5 0 0 1 711 235 H658"/>
+      <path d="M855 151 H800 A30 30 0 0 0 770 181 V205 A30 30 0 0 0 800 235 H855 V196 H818"/>
+      <path d="M962 151 H891 V235 H962 M891 193 H950"/>
+      <path d="M1072 151 H1001 V235 H1072 M1001 193 H1060"/>
+    </g>
+    <!-- Буква N: две палочки и диагональ -->
+    <rect x="553" y="139" width="24" height="106"/>
+    <rect x="618" y="139" width="24" height="106"/>
+    <polygon points="553,139 578,139 642,245 617,245"/>
+    <!-- Буква K: палочка + треугольник -->
+    <rect x="1095" y="140" width="21" height="105"/>
+    <polygon points="1124,192 1180,140 1180,245"/>
+  </g>
+</svg>
